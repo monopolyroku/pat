@@ -10,6 +10,21 @@ comments (e.g. `A.3.3`, `TD-4`) point into those files.
 - `ros2_ws/src/pat_msgs` — fixed-size message definitions (AD-7)
 - `ros2_ws/src/pat_common` — header-only: shared QoS profiles (`qos.hpp`, the only
   place QoS may be defined), topic names, units, `SeqlockBuffer`, `SpscQueue`
+- `ros2_ws/src/pat_estimator` — `pat_estimator_core`: ROS-free ResidualLosEstimator
+  (delayed camera fusion, TD-4); node wrapper to follow
+- `ros2_ws/src/pat_sim` — `PlantModel` physics + `synthetic_plant` node standing in
+  for all four drivers; `README.md` there documents the plant and the test evidence
+
+## Running the simulation
+
+```bash
+ros2 launch pat_sim plant.launch.py [params:=file.yaml]
+# in another shell, before any ros2 topic/node command:
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export CYCLONEDDS_URI=file://$PWD/ros2_ws/src/pat_sim/config/cyclonedds_localhost.xml
+```
+
+ROS 2 YAML cannot express an empty list parameter; omit schedule params to disable.
 
 ## Build and test
 

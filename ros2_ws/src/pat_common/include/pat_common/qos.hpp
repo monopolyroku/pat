@@ -91,4 +91,10 @@ inline rclcpp::QoS telemetry()
   return rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().durability_volatile();
 }
 
+// Simulation ground truth: scoring data, completeness matters more than latency.
+inline rclcpp::QoS sim_truth()
+{
+  return rclcpp::QoS(rclcpp::KeepLast(100)).reliable().durability_volatile();
+}
+
 }  // namespace pat_common::qos

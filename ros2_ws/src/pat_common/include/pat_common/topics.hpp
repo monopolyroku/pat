@@ -22,4 +22,7 @@ inline constexpr const char * kTelemetry = "/pat/telemetry";
 inline constexpr const char * kPointingSeed = "/pat/host/pointing_seed";
 inline constexpr const char * kModeRequest = "/pat/host/mode_request";
 
+// Simulation only.
+inline constexpr const char * kSimTruth = "/pat/sim/truth";
+
 }  // namespace pat_common::topics

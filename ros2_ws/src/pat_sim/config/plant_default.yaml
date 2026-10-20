@@ -1,0 +1,58 @@
+# Default synthetic plant: the A.0.2 assumptions table in one place.
+# Every value here is an [A] assumption from design_part_a.md.
+synthetic_plant:
+  ros__parameters:
+    # --- truth motion ---
+    target_offset_urad: [300.0, -200.0]
+    target_drift_urad_s: [0.0, 0.0]
+    platform_rate_deg_s: [0.0, 0.0]        # up to 1 deg/s base motion
+    platform_sway_amp_deg: 0.0
+    platform_sway_freq_hz: 0.1
+    vib_rms_urad: 100.0                    # 1-200 Hz, 100 urad RMS
+    vib_f_lo_hz: 1.0
+    vib_f_hi_hz: 200.0
+    vib_lines: 12
+
+    # --- actuators ---
+    gimbal_bw_hz: 5.0
+    gimbal_max_rate_deg_s: 20.0
+    gimbal_range_deg: [60.0, 30.0]
+    fsm_wn_hz: 800.0
+    fsm_zeta: 0.7
+    fsm_range_urad: 2000.0
+
+    # --- sensors ---
+    camera_rate_hz: 50.0
+    camera_latency_ms: 25.0                # 20-30 ms exposure -> message
+    camera_jitter_ms: 5.0
+    camera_noise_urad: 5.0
+    camera_confidence: 0.9
+    camera_confidence_noise: 0.05
+    camera_dropout_prob: 0.0
+    # Schedules are flat [start, end, start, end, ...] in seconds since start.
+    # An empty list cannot be expressed in ROS 2 YAML, so leave them out to disable.
+    # camera_gaps_s: [5.0, 5.3, 8.0, 10.0]
+    gyro_noise_urad_s_sqrt_hz: 50.0
+    gyro_bias_urad_s: [200.0, -150.0]
+    gyro_bias_rw_urad_s_sqrt_s: 5.0
+    # imu_gaps_s: [12.0, 12.5]
+    # imu_bursts_s: [15.0, 15.02]          # windows where every IMU sample is garbage
+    imu_glitch_rate_hz: 0.0                # Poisson single-sample spikes
+    imu_glitch_rad_s: 20.0
+
+    # --- node ---
+    tick_rate_hz: 1000.0
+    gimbal_state_rate_hz: 200.0
+    truth_rate_hz: 1000.0
+    external_cmd_timeout_ms: 200.0
+    seed: 42
+
+    # --- open-loop profiles (used when no controller is commanding) ---
+    gimbal_profile: hold                   # hold | ramp | sine
+    gimbal_profile_start_s: 2.0
+    gimbal_profile_rate_deg_s: 0.1         # RECENTRE offload rate limit (A.2.6)
+    gimbal_profile_amp_urad: 1000.0
+    gimbal_profile_freq_hz: 0.2
+    fsm_profile: hold                      # hold | sine
+    fsm_profile_amp_urad: 800.0
+    fsm_profile_freq_hz: 3.0

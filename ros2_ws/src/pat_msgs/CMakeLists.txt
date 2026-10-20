@@ -13,6 +13,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/GimbalCmd.msg"
   "msg/GimbalState.msg"
   "msg/Mode.msg"
+  "msg/SimTruth.msg"
   DEPENDENCIES std_msgs
 )
 
