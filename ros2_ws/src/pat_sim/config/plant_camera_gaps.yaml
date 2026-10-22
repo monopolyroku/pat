@@ -1,0 +1,12 @@
+# CD-6 scenario: camera gaps of 150 ms (degrade, stay valid) and 400 ms
+# (validity must expire), repeating; plus a gimbal recentring ramp at 0.1 deg/s
+# so the feedforward path is exercised while the camera is away.
+synthetic_plant:
+  ros__parameters:
+    platform_rate_deg_s: [0.2, -0.1]
+    vib_rms_urad: 100.0
+    camera_gaps_s: [4.0, 4.15, 7.0, 7.4, 10.0, 10.15, 13.0, 13.4]
+    gimbal_profile: ramp
+    gimbal_profile_start_s: 3.0
+    gimbal_profile_rate_deg_s: 0.1
+    seed: 11

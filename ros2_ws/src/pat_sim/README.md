@@ -195,13 +195,53 @@ test script was rejected by the middleware with *incompatible QoS: DEADLINE*,
 because the script had not used the shared profile. That is the AD-7 / A.4.1
 mismatch guard behaving as designed; the fix was on the script side.
 
-### 2.5 Not yet tested / known limits
+### 2.5 `state_estimator` node — end-to-end over CycloneDDS
 
-- No timing-percentile evidence yet (TD-10); that arrives with the `pat_fast`
-  executor layout and the estimator node.
-- The plant runs on a generic kernel with a wall timer: ~1 kHz average, no
-  bound on individual tick jitter.
-- Authority enforcement, lifecycle gating and `/pat/mode` handling are not in
-  the plant; they belong to the driver/controller work.
-- Estimator ↔ plant integration (closed data path over DDS, replay vs.
-  apply-at-arrival measured on the live stream) is the next step.
+The node (`pat_estimator/src/state_estimator_node.cpp`) wraps the core as a
+`LifecycleNode` with two callback groups — `imu_grp` (IMU, FSM state, gimbal
+cmd, IMU-loss watchdog) and `cam_grp` (camera) — which the executable
+(`state_estimator_main.cpp`) places on two `SingleThreadedExecutor`s on
+separate threads (E1/E2 of A.4.2). Camera corrections cross from E2 to E1
+through `pat_common::SpscQueue` and are applied at the start of the next IMU
+tick. `autostart: true` configures and activates on launch in lieu of a
+lifecycle manager.
+
+Scenarios are run with `run_scenario.sh <fusion_mode> <plant.yaml>`, which
+launches plant + estimator, scores `/pat/estimate/los_error` against
+`/pat/sim/truth` by matching header stamps, and shuts everything down. Results
+on this host (generic kernel, normal priority, 10 s scored after 2 s settle):
+
+| Scenario (`config/`) | fusion_mode | error RMS / p99 / max (urad) | valid | notes |
+|---|---|---|---|---|
+| `plant_motion_1degs.yaml`: 1°/s base motion, 100 urad vibration, camera 25 ± 5 ms, 5 urad noise, gyro bias 200 urad/s + 50 urad/s/√Hz noise | **replay** | **11.4 / 26.0 / 36.5** | 100 % | 762 frames accepted, 2 rejected (start-up); estimate at 998 Hz |
+| same | apply_at_arrival | **443.8 / 565 / 583** | 100 % | ≈ rate × delay = 436 urad, as TD-4 predicts; `|err|/σ` = 45 — the covariance has no idea it is wrong |
+| `plant_camera_gaps.yaml`: 0.2°/s, camera gaps of 150 ms and 400 ms, gimbal RECENTRE ramp 0.1°/s from t = 3 s | replay | 12.5 / 32.0 / 39.6 | 96.5 % | mode `IMU_ONLY` 5.7 % of samples (age > 100 ms); `valid=false` exactly during the > 200 ms portions of the long gaps; max error 39.6 urad while coasting 400 ms *with the gimbal moving* (698 urad of commanded motion fed forward) |
+
+Why 11 urad live versus 4 urad in the unit tests: the plant adds the assumed
+gyro noise (50 urad/s/√Hz → ~7 urad random walk between 20 ms frames) and a
+200 urad/s bias the drift state must track; the unit-test truth model had
+neither. 11 urad is within the 20 urad fine-lock budget of A.0.2 with the
+assumed sensors. `|err|/σ` ≈ 0.63 means the reported covariance is
+conservative by ~1.6×, which is acceptable for gating but worth tuning once
+real noise figures exist.
+
+Also checked: `fast_thread_priority:=50` without privilege logs
+`SCHED_FIFO 50 not applied (Operation not permitted); running at normal
+priority` and continues (TD-10 graceful degradation).
+
+**A measurement mistake worth recording.** The first live runs showed
+`camera frames accepted` growing at ~1 kHz instead of 50 Hz. The cause was not
+in the estimator: killing a `ros2 launch` shell from the tool harness orphaned
+the node processes, so two plants and two estimators were publishing on the
+same topics. `run_scenario.sh` now refuses to start if plant/estimator
+processes exist and kills its children on exit. All numbers above are from
+clean runs.
+
+### 2.6 Not yet tested / known limits
+
+- No timing-percentile evidence (TD-10): the generic kernel, wall timers and
+  normal priority mean the ~1 kHz rates are averages with unbounded jitter.
+- Authority enforcement, `/pat/mode` handling and lifecycle management are not
+  implemented; the estimator autostarts itself.
+- The estimator's output is scored open-loop (no controllers close on it).
+- Covariance calibration (`|err|/σ` ≈ 0.63) has not been tuned.

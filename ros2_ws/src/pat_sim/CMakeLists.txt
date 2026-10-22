@@ -42,6 +42,7 @@ install(TARGETS plant_model synthetic_plant_component
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
+install(PROGRAMS scripts/score_estimate.py scripts/run_scenario.sh DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

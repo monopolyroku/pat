@@ -1,0 +1,11 @@
+# TD-4 scenario: 1 deg/s base motion with 25 +/- 5 ms camera latency.
+# Apply-at-arrival fusion should show ~436 urad error; replay should not.
+synthetic_plant:
+  ros__parameters:
+    platform_rate_deg_s: [1.0, 0.0]
+    vib_rms_urad: 100.0
+    camera_latency_ms: 25.0
+    camera_jitter_ms: 5.0
+    camera_noise_urad: 5.0
+    gyro_bias_urad_s: [200.0, -150.0]
+    seed: 7

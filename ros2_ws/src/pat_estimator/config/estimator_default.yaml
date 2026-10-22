@@ -1,0 +1,44 @@
+# state_estimator defaults. All thresholds are [A] from design_part_a.md.
+state_estimator:
+  ros__parameters:
+    fusion_mode: replay                    # replay (TD-4 c) | apply_at_arrival (baseline a)
+    autostart: true                        # configure+activate on start (no lifecycle manager yet)
+
+    # process noise
+    gyro_noise_urad_s_sqrt_hz: 50.0
+    drift_rate_random_walk_urad_s_sqrt_s: 10.0
+    camera_only_q_scale: 16.0
+
+    # camera measurement and gates (A.3.3 item 3)
+    camera_noise_urad: 5.0
+    camera_confidence_floor: 0.05
+    camera_outlier_gate_sigma: 3.0
+    camera_outlier_min_confidence: 0.6
+    camera_future_tolerance_ms: 5.0
+
+    # validity / mode (CD-6, A.5.1)
+    camera_coast_age_ms: 100.0
+    camera_valid_age_ms: 200.0
+    imu_valid_age_ms: 5.0
+    pos_var_valid_urad2: 100000.0
+
+    # IMU gating (A.5.1)
+    imu_max_rate_rad_s: 10.0
+    imu_max_step_rad_s: 1.0
+    imu_burst_count: 5
+    imu_burst_window_ms: 100.0
+    imu_recover_ms: 1000.0
+
+    max_dt_s: 0.010
+    initial_pos_sigma_urad: 2000.0
+    initial_vel_sigma_urad_s: 500.0
+
+    # inputs
+    imu_to_optical: [1.0, 0.0, 0.0,        # ex <- gyro x
+                     0.0, 1.0, 0.0]        # ey <- gyro y
+    fsm_fresh_ms: 5.0
+    gimbal_cmd_fresh_ms: 100.0
+    imu_timeout_ms: 5.0
+
+    # process layout (state_estimator_main.cpp); 0 = normal priority
+    fast_thread_priority: 0
