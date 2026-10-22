@@ -14,8 +14,9 @@ comments (e.g. `A.3.3`, `TD-4`) point into those files.
   delayed camera fusion, TD-4) + `state_estimator` lifecycle node with the E1/E2
   two-executor layout
 - `ros2_ws/src/pat_sim` — `PlantModel` physics + `synthetic_plant` node standing in
-  for all four drivers, scorer and scenario runner; `README.md` there documents the
-  plant and all test evidence
+  for all four drivers, scorer and scenario runner
+- `PART_B.md` — risk ranking and rationale; `PART_C.md` — run instructions, test
+  evidence and how the implementation works (keep these current when results change)
 
 ## Running the simulation
 
