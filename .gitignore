@@ -7,3 +7,4 @@ ros2_ws/log/
 
 # local
 .devin/config.local.json
+AGENTS.md
